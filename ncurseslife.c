@@ -3,8 +3,6 @@
 #include <string.h>
 #include <ncurses.h>
 
-#define COLS 60
-#define ROWS 40
 #define L '0' // Live cell
 #define D ' ' // Dead cell
 #define TIMEOUT 300 // Defines timeout for getch
@@ -22,10 +20,29 @@ void spawnBlock(unsigned int **arr, int rows, int cols);
 void clearScreen(unsigned int **arr, int rows, int cols);
 void spawnGlider(unsigned int **arr, int rows, int cols);
 
-int main() {
+int main(int argc, char* argv[]) {
+    int rows = -1;
+    int cols = -1;
+    char t;
+    if (argc == 3) { 
+        // Check correct args
+        if (!(sscanf(argv[1], "%d%c", &rows, &t) == 1 && rows > 2 && sscanf(argv[2], "%d%c", &cols, &t) == 1 && cols > 2)) {
+            printf("Usage: %s <numberofrows> <numberofcolumns>\nwhere numberofrows > 2 and numberofcolumns > 2\nor just %s for default settings\n", argv[0], argv[0]);
+            return 1;
+        }
+    } else if (argc > 1) {
+        printf("Usage: %s <numberofrows> <numberofcolumns>\nwhere numberofrows > 2 and numberofcolumns > 2\nor just %s for default settings\n", argv[0], argv[0]);
+        return 1;
+    } else { // Default settings
+        rows = 20;
+        cols = 60;
+    }
+
     srandom(time(NULL)); //NEEDS TO BE AT THE TOP OF MAIN! seeding random
     
-    unsigned int **nextArea = make2DArr(ROWS, COLS);
+
+    
+    unsigned int **nextArea = make2DArr(rows, cols);
     unsigned int **area; // Current area
     
     initscr();
@@ -34,7 +51,7 @@ int main() {
     cbreak();
     timeout(TIMEOUT);  // getch() waits for TIMEOUT ms before continuing 
     curs_set(0); // sets cursor invisible
-    fill(nextArea, ROWS, COLS); // needs to be after initscr!!!!
+    fill(nextArea, rows, cols); // needs to be after initscr!!!!
     
     int y,x;
     
@@ -45,25 +62,25 @@ int main() {
         command = getch(); // getch() calls refresh()
         switch (command) {
             case 'q': q = 1; break;
-            case 'c': clearScreen(nextArea, ROWS, COLS); break;
-            case 'b': spawnBlock(nextArea, ROWS, COLS); break;
-            case 'g': spawnGlider(nextArea, ROWS, COLS); break;
+            case 'c': clearScreen(nextArea, rows, cols); break;
+            case 'b': spawnBlock(nextArea, rows, cols); break;
+            case 'g': spawnGlider(nextArea, rows, cols); break;
             default:;
         }
 
         getmaxyx(stdscr, y, x);
-        area = copy2DArr(nextArea, ROWS, COLS);
-        printToScreen(area, ROWS, COLS, 1, x/2-COLS/2);  // prints everything to upper center with border wrapped around it
+        area = copy2DArr(nextArea, rows, cols);
+        printToScreen(area, rows, cols, 1, x/2-cols/2);  // prints everything to upper center with border wrapped around it
         
-        for (int y = 0; y < ROWS; y++) {
-            for (int x = 0; x < COLS; x++) {
-                nextArea[y][x] = calc(area, ROWS, COLS, y, x);
+        for (int y = 0; y < rows; y++) {
+            for (int x = 0; x < cols; x++) {
+                nextArea[y][x] = calc(area, rows, cols, y, x);
             }
         }
-        free2DArr(area, ROWS);
+        free2DArr(area, rows);
     }
 
-    free2DArr(nextArea, ROWS);
+    free2DArr(nextArea, rows);
     endwin();
     return 0;
 }
