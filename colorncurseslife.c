@@ -53,8 +53,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     start_color();
-    init_pair(1, COLOR_GREEN, COLOR_WHITE); // for screen
-    init_pair(2, COLOR_GREEN, COLOR_BLACK); // for text
+    init_pair(1, COLOR_GREEN, COLOR_BLACK);
+    
     attrset(A_BOLD); // Bold/bright text
     noecho(); // Do not show input on screen
     cbreak(); // getch() gets input without pressing enter
@@ -90,7 +90,6 @@ int main(int argc, char* argv[]) {
     }
 
     free2DArr(nextArea, rows);
-    attrset(0);
     endwin();
     return 0;
 }
@@ -123,7 +122,6 @@ void printToScreen(unsigned int **arr, int rows, int cols, int sy, int sx) {
         y++;
     }
     y += 1; // skip border and main area
-    attrset(COLOR_PAIR(2));
     mvaddstr(y,sx,"Commands:"); y++; 
     mvaddstr(y,sx,"q - quit"); y++;
     mvaddstr(y,sx,"c - clear screen"); y++;
