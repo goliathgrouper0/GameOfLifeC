@@ -20,10 +20,12 @@ void spawnBlock(unsigned int **arr, int rows, int cols);
 void clearScreen(unsigned int **arr, int rows, int cols);
 void spawnGlider(unsigned int **arr, int rows, int cols);
 void setTimeout();
+void pause();
 
 
 unsigned int TimeOut = 300; //ms
 unsigned long int ngen = 0;
+short int paused = 0; // 0 - unpaused; 1 - paused (timeout(-1))
 int main(int argc, char* argv[]) {
     int rows = -1;
     int cols = -1;
@@ -76,6 +78,7 @@ int main(int argc, char* argv[]) {
             case 'b': spawnBlock(nextArea, rows, cols); break;
             case 'g': spawnGlider(nextArea, rows, cols); break;
             case 't': setTimeout(); break;
+            case 'p': pause(); break;
             default:;
         }
         getmaxyx(stdscr, y, x);
@@ -98,16 +101,24 @@ int main(int argc, char* argv[]) {
 
 
 void pause() {
-    timeout(-1); // disable timeout
-    while (getch() != 'p') {
-
-    }
+    if (paused) {
+        timeout(TimeOut); // restore to normal
+        paused = 0;
+    } else {
+        timeout(-1); // disable timeout (pause)
+        paused = 1;
+    } 
 }
 
 void setTimeout() {
     int y = 0;
     int x = 0;
     int newTimeout = -1;
+    if (paused) {
+        mvprintw(y,x,"Unpause befor setting new timeout!!!");
+        getch();
+        return;
+    }
     mvprintw(y, x,"Current timeout is %ums", TimeOut);y++;
     mvprintw(y, x,"Set new timeout: ");
     char ch = ' ';
@@ -161,6 +172,7 @@ void printToScreen(unsigned int **arr, int rows, int cols, int sy, int sx) {
     mvaddstr(y,sx,"q - quit, c - clear screen"); y++;
     mvaddstr(y,sx,"b - spawn block, g - spawn glider"); y++;
     mvaddstr(y,sx,"t - set timeout, p - pause/unpause"); y++;
+    mvaddstr(y,sx,"l - spawn blinker");
 }
 
 void spawnGlider(unsigned int **arr, int rows, int cols) {
