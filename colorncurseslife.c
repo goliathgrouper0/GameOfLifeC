@@ -5,7 +5,7 @@
 
 #define L '0' // Live cell
 #define D ' ' // Dead cell
-#define TIMEOUT 300 // Defines timeout for getch
+// #define TIMEOUT 300 // Defines timeout for getch
 
 
 void wrapBorder(int starty, int startx, int height, int width);
@@ -19,7 +19,10 @@ void printToScreen(unsigned int **arr, int rows, int cols, int sy, int sx);
 void spawnBlock(unsigned int **arr, int rows, int cols);
 void clearScreen(unsigned int **arr, int rows, int cols);
 void spawnGlider(unsigned int **arr, int rows, int cols);
+void setTimeout();
 
+
+unsigned int TimeOut = 300; //ms
 int main(int argc, char* argv[]) {
     int rows = -1;
     int cols = -1;
@@ -58,7 +61,7 @@ int main(int argc, char* argv[]) {
     attrset(A_BOLD); // Bold/bright text
     noecho(); // Do not show input on screen
     cbreak(); // getch() gets input without pressing enter
-    timeout(TIMEOUT);  // getch() waits for TIMEOUT ms before continuing 
+    timeout(TimeOut);  // getch() waits for TimeOut ms before continuing 
     curs_set(0); // sets cursor invisible
     fill(nextArea, rows, cols); // needs to be after initscr!!!!
     
@@ -74,6 +77,7 @@ int main(int argc, char* argv[]) {
             case 'c': clearScreen(nextArea, rows, cols); break;
             case 'b': spawnBlock(nextArea, rows, cols); break;
             case 'g': spawnGlider(nextArea, rows, cols); break;
+            case 't': setTimeout(); break;
             default:;
         }
 
@@ -93,6 +97,31 @@ int main(int argc, char* argv[]) {
     endwin();
     return 0;
 }
+
+void setTimeout() {
+    int y = 0;
+    int x = 0;
+    int newTimeout = -1;
+    mvprintw(y, x,"Current timeout is %ums", TimeOut);y++;
+    mvprintw(y, x,"Set new timeout: ");
+    char ch = ' ';
+    timeout(-1); // Disables timeout
+    nocbreak();
+    echo();
+    curs_set(2); // visible cursor
+    if (scanw("%d%c", &newTimeout, &ch) == 1 && ch == ' ' && newTimeout >= 0) {
+        timeout(newTimeout);
+        TimeOut = newTimeout;
+    } else {
+        printw("Timeout will remain the same. To continue press ENTER");
+        getch();
+        timeout(TimeOut);
+    }
+    cbreak();
+    noecho();
+    curs_set(0); // invisible cursor
+}
+
 
 // Wraps border around described block
 void wrapBorder(int starty, int startx, int height, int width) {
@@ -123,10 +152,9 @@ void printToScreen(unsigned int **arr, int rows, int cols, int sy, int sx) {
     }
     y += 1; // skip border and main area
     mvaddstr(y,sx,"Commands:"); y++; 
-    mvaddstr(y,sx,"q - quit"); y++;
-    mvaddstr(y,sx,"c - clear screen"); y++;
-    mvaddstr(y,sx,"b - spawn block"); y++;
-    mvaddstr(y,sx,"g - spawn glider"); y++;
+    mvaddstr(y,sx,"q - quit, c - clear screen"); y++;
+    mvaddstr(y,sx,"b - spawn block, g - spawn glider"); y++;
+    mvaddstr(y,sx,"t - set timeout, p - pause"); y++;
 }
 
 void spawnGlider(unsigned int **arr, int rows, int cols) {
