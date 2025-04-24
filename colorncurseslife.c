@@ -21,6 +21,7 @@ void clearScreen(unsigned int **arr, int rows, int cols);
 void spawnGlider(unsigned int **arr, int rows, int cols);
 void setTimeout();
 void pause();
+void spawnBlinker(unsigned int **arr, int rows, int cols);
 
 
 unsigned int TimeOut = 300; //ms
@@ -79,6 +80,7 @@ int main(int argc, char* argv[]) {
             case 'g': spawnGlider(nextArea, rows, cols); break;
             case 't': setTimeout(); break;
             case 'p': pause(); break;
+            case 'l': spawnBlinker(nextArea, rows, cols); break;
             default:;
         }
         getmaxyx(stdscr, y, x);
@@ -173,6 +175,16 @@ void printToScreen(unsigned int **arr, int rows, int cols, int sy, int sx) {
     mvaddstr(y,sx,"b - spawn block, g - spawn glider"); y++;
     mvaddstr(y,sx,"t - set timeout, p - pause/unpause"); y++;
     mvaddstr(y,sx,"l - spawn blinker");
+}
+
+void spawnBlinker(unsigned int **arr, int rows, int cols) {
+    int y = random()%rows;
+    int x = random()%cols;
+    int up = (y-1 < 0) ? rows-1 : y-1;
+    int down = (y+1 > rows-1) ? 0 : y+1;
+    arr[y][x] = L;
+    arr[up][x] = L;
+    arr[down][x] = L;
 }
 
 void spawnGlider(unsigned int **arr, int rows, int cols) {
