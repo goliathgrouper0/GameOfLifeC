@@ -23,6 +23,7 @@ void setTimeout();
 
 
 unsigned int TimeOut = 300; //ms
+unsigned long int ngen = 0;
 int main(int argc, char* argv[]) {
     int rows = -1;
     int cols = -1;
@@ -42,8 +43,6 @@ int main(int argc, char* argv[]) {
     }
 
     srandom(time(NULL)); //NEEDS TO BE AT THE TOP OF MAIN! seeding random
-    
-
     
     unsigned int **nextArea = make2DArr(rows, cols);
     unsigned int **area; // Current area
@@ -66,7 +65,6 @@ int main(int argc, char* argv[]) {
     fill(nextArea, rows, cols); // needs to be after initscr!!!!
     
     int y,x;
-    
     // Press q to quit
     int q = 0; // indicates press of q
     int command = -1;
@@ -80,7 +78,6 @@ int main(int argc, char* argv[]) {
             case 't': setTimeout(); break;
             default:;
         }
-
         getmaxyx(stdscr, y, x);
         area = copy2DArr(nextArea, rows, cols);
         printToScreen(area, rows, cols, 1, x/2-cols/2);  // prints everything to upper center with border wrapped around it
@@ -88,14 +85,23 @@ int main(int argc, char* argv[]) {
         for (int y = 0; y < rows; y++) {
             for (int x = 0; x < cols; x++) {
                 nextArea[y][x] = calc(area, rows, cols, y, x);
+                
             }
         }
         free2DArr(area, rows);
+        ngen++;  // increase gen counter
     }
-
     free2DArr(nextArea, rows);
     endwin();
     return 0;
+}
+
+
+void pause() {
+    timeout(-1); // disable timeout
+    while (getch() != 'p') {
+
+    }
 }
 
 void setTimeout() {
@@ -151,10 +157,10 @@ void printToScreen(unsigned int **arr, int rows, int cols, int sy, int sx) {
         y++;
     }
     y += 1; // skip border and main area
-    mvaddstr(y,sx,"Commands:"); y++; 
+    mvprintw(y,sx,"Commands:                        gen: %lu", ngen); y++; 
     mvaddstr(y,sx,"q - quit, c - clear screen"); y++;
     mvaddstr(y,sx,"b - spawn block, g - spawn glider"); y++;
-    mvaddstr(y,sx,"t - set timeout, p - pause"); y++;
+    mvaddstr(y,sx,"t - set timeout, p - pause/unpause"); y++;
 }
 
 void spawnGlider(unsigned int **arr, int rows, int cols) {
