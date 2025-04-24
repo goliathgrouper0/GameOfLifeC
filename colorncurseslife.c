@@ -27,6 +27,7 @@ void spawnBlinker(unsigned int **arr, int rows, int cols);
 unsigned int TimeOut = 300; //ms
 unsigned long int ngen = 0;
 short int paused = 0; // 0 - unpaused; 1 - paused (timeout(-1))
+// ===========================================================================
 int main(int argc, char* argv[]) {
     int rows = -1;
     int cols = -1;
@@ -51,14 +52,11 @@ int main(int argc, char* argv[]) {
     unsigned int **area; // Current area
     
     initscr();
-    if (!has_colors()) {
-        endwin();
-        free2DArr(nextArea, rows);
-        printf("Your terminal does not support colors!! Try version without colors\n");
-        return 1;
+    if (has_colors()) {
+        start_color();
+        init_pair(1, COLOR_GREEN, COLOR_BLACK);
     }
-    start_color();
-    init_pair(1, COLOR_GREEN, COLOR_BLACK);
+
     
     attrset(A_BOLD); // Bold/bright text
     noecho(); // Do not show input on screen
@@ -100,7 +98,7 @@ int main(int argc, char* argv[]) {
     endwin();
     return 0;
 }
-
+// ====================================================================
 
 void pause() {
     if (paused) {
@@ -159,7 +157,9 @@ void wrapBorder(int starty, int startx, int height, int width) {
 
 void printToScreen(unsigned int **arr, int rows, int cols, int sy, int sx) {
     clear(); // Clears anomalies after resizing
-    attrset(COLOR_PAIR(1));
+    if (has_colors()) {
+        attrset(COLOR_PAIR(1));
+    }
     wrapBorder(sy, sx, rows, cols);
     int y = sy;
     for (int row = 0; row < rows; row++) {
@@ -290,7 +290,7 @@ void free2DArr(unsigned int **arr, int rows) {
     free(arr);
 }
 
-// Prints 2d array of chars
+// Prints 2d array of chars (not ncurses)
 void print2DArr(unsigned int **arr, int rows, int cols) {
     for (int row = 0; row < rows; row++) {
         for (int col = 0; col < cols; col++) {
